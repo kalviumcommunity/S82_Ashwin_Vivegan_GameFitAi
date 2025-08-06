@@ -56,7 +56,7 @@ This allows the frontend to easily parse and display:
 **How GameFit AI uses it:**
 
 The system prompt enforces a JSON structure:
-```json
+json
 {
   "compatible": true,
   "settings": "Medium",
