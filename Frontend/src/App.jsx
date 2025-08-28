@@ -5,15 +5,17 @@ export default function App() {
   const [game, setGame] = useState("");
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [zeroShot, setZeroShot] = useState(false); // toggle zero-shot mode
-  const [oneShot, setOneShot] = useState(false);   // toggle one-shot mode
+  const [zeroShot, setZeroShot] = useState(false);
+  const [oneShot, setOneShot] = useState(false);
+  const [multiShot, setMultiShot] = useState(false);
 
   const handleCheck = async () => {
     setLoading(true);
     setResult(null);
 
     let endpoint = "check"; // default system prompt
-    if (oneShot) endpoint = "check-one-shot";
+    if (multiShot) endpoint = "check-multi-shot";
+    else if (oneShot) endpoint = "check-one-shot";
     else if (zeroShot) endpoint = "check-zero-shot";
 
     try {
@@ -26,7 +28,6 @@ export default function App() {
       const data = await res.json();
       setResult(data);
     } catch (err) {
-      console.error(err);
       setResult({ error: "Something went wrong" });
     }
 
@@ -60,10 +61,13 @@ export default function App() {
               checked={zeroShot}
               onChange={() => {
                 setZeroShot(!zeroShot);
-                if (!zeroShot) setOneShot(false); // disable one-shot if zero-shot enabled
+                if (!zeroShot) {
+                  setOneShot(false);
+                  setMultiShot(false);
+                }
               }}
             />{" "}
-            Zero-Shot Mode
+            Zero-Shot
           </label>
 
           <label>
@@ -72,10 +76,28 @@ export default function App() {
               checked={oneShot}
               onChange={() => {
                 setOneShot(!oneShot);
-                if (!oneShot) setZeroShot(false); // disable zero-shot if one-shot enabled
+                if (!oneShot) {
+                  setZeroShot(false);
+                  setMultiShot(false);
+                }
               }}
             />{" "}
-            One-Shot Mode
+            One-Shot
+          </label>
+
+          <label>
+            <input
+              type="checkbox"
+              checked={multiShot}
+              onChange={() => {
+                setMultiShot(!multiShot);
+                if (!multiShot) {
+                  setZeroShot(false);
+                  setOneShot(false);
+                }
+              }}
+            />{" "}
+            Multi-Shot
           </label>
         </div>
 
@@ -86,6 +108,8 @@ export default function App() {
         >
           {loading
             ? "Checking..."
+            : multiShot
+            ? "Check Multi-Shot"
             : oneShot
             ? "Check One-Shot"
             : zeroShot
@@ -98,10 +122,10 @@ export default function App() {
         <div className="mt-6 w-full max-w-md bg-white p-6 rounded-2xl shadow-md">
           {result.error ? (
             <p className="text-red-500">{result.error}</p>
-          ) : oneShot || zeroShot ? (
+          ) : zeroShot || oneShot || multiShot ? (
             <div>
               <h2 className="text-xl font-semibold mb-4">AI Response</h2>
-              <p>{oneShot ? JSON.stringify(result, null, 2) : result.response}</p>
+              <p>{result.response}</p>
             </div>
           ) : (
             <>
