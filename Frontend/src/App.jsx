@@ -6,21 +6,21 @@ export default function App() {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [zeroShot, setZeroShot] = useState(false); // toggle zero-shot mode
+  const [oneShot, setOneShot] = useState(false);   // toggle one-shot mode
 
   const handleCheck = async () => {
     setLoading(true);
     setResult(null);
 
-    try {
-      const endpoint = zeroShot ? "check-zero-shot" : "check";
-      const body = zeroShot
-        ? { model, game } // backend will form prompt
-        : { model, game };
+    let endpoint = "check"; // default system prompt
+    if (oneShot) endpoint = "check-one-shot";
+    else if (zeroShot) endpoint = "check-zero-shot";
 
+    try {
       const res = await fetch(`http://localhost:5000/${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        body: JSON.stringify({ model, game }),
       });
 
       const data = await res.json();
@@ -53,14 +53,29 @@ export default function App() {
           onChange={(e) => setGame(e.target.value)}
         />
 
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-4">
           <label>
             <input
               type="checkbox"
               checked={zeroShot}
-              onChange={() => setZeroShot(!zeroShot)}
+              onChange={() => {
+                setZeroShot(!zeroShot);
+                if (!zeroShot) setOneShot(false); // disable one-shot if zero-shot enabled
+              }}
             />{" "}
             Zero-Shot Mode
+          </label>
+
+          <label>
+            <input
+              type="checkbox"
+              checked={oneShot}
+              onChange={() => {
+                setOneShot(!oneShot);
+                if (!oneShot) setZeroShot(false); // disable zero-shot if one-shot enabled
+              }}
+            />{" "}
+            One-Shot Mode
           </label>
         </div>
 
@@ -69,7 +84,13 @@ export default function App() {
           disabled={loading}
           className="w-full bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 transition"
         >
-          {loading ? "Checking..." : zeroShot ? "Ask AI" : "Check Compatibility"}
+          {loading
+            ? "Checking..."
+            : oneShot
+            ? "Check One-Shot"
+            : zeroShot
+            ? "Ask AI"
+            : "Check Compatibility"}
         </button>
       </div>
 
@@ -77,10 +98,10 @@ export default function App() {
         <div className="mt-6 w-full max-w-md bg-white p-6 rounded-2xl shadow-md">
           {result.error ? (
             <p className="text-red-500">{result.error}</p>
-          ) : zeroShot ? (
+          ) : oneShot || zeroShot ? (
             <div>
               <h2 className="text-xl font-semibold mb-4">AI Response</h2>
-              <p>{result.response}</p>
+              <p>{oneShot ? JSON.stringify(result, null, 2) : result.response}</p>
             </div>
           ) : (
             <>
