@@ -129,7 +129,7 @@ export default function App() {
             </div>
           ) : (
             <>
-              <h2 className="text-xl font-semibold mb-4">Results</h2>
+              <h2 className="text-xl font-semibold mb-4">Structured Results</h2>
               <p><b>Compatible:</b> {result.compatible ? "✅ Yes" : "❌ No"}</p>
               <p><b>Settings:</b> {result.settings}</p>
               <p><b>FPS Estimate:</b> {result.fps_estimate}</p>
