@@ -5,16 +5,22 @@ export default function App() {
   const [game, setGame] = useState("");
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [zeroShot, setZeroShot] = useState(false); // toggle zero-shot mode
 
   const handleCheck = async () => {
     setLoading(true);
     setResult(null);
 
     try {
-      const res = await fetch("http://localhost:5000/check", {
+      const endpoint = zeroShot ? "check-zero-shot" : "check";
+      const body = zeroShot
+        ? { model, game } // backend will form prompt
+        : { model, game };
+
+      const res = await fetch(`http://localhost:5000/${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ model, game }),
+        body: JSON.stringify(body),
       });
 
       const data = await res.json();
@@ -47,12 +53,23 @@ export default function App() {
           onChange={(e) => setGame(e.target.value)}
         />
 
+        <div className="flex items-center space-x-2">
+          <label>
+            <input
+              type="checkbox"
+              checked={zeroShot}
+              onChange={() => setZeroShot(!zeroShot)}
+            />{" "}
+            Zero-Shot Mode
+          </label>
+        </div>
+
         <button
           onClick={handleCheck}
           disabled={loading}
           className="w-full bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 transition"
         >
-          {loading ? "Checking..." : "Check Compatibility"}
+          {loading ? "Checking..." : zeroShot ? "Ask AI" : "Check Compatibility"}
         </button>
       </div>
 
@@ -60,6 +77,11 @@ export default function App() {
         <div className="mt-6 w-full max-w-md bg-white p-6 rounded-2xl shadow-md">
           {result.error ? (
             <p className="text-red-500">{result.error}</p>
+          ) : zeroShot ? (
+            <div>
+              <h2 className="text-xl font-semibold mb-4">AI Response</h2>
+              <p>{result.response}</p>
+            </div>
           ) : (
             <>
               <h2 className="text-xl font-semibold mb-4">Results</h2>
