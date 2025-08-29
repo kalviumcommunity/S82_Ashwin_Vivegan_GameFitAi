@@ -15,15 +15,17 @@ async function generateWithTemperature(prompt, stopSequences = []) {
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
   const result = await model.generateContent({
-    contents: [{ role: "user", parts: [{ text: prompt }] }],
-    generationConfig: {
-      temperature: 0.25, // 👈 set between 0.2–0.3 for precise answers
-      stopSequences: stopSequences.length > 0 ? stopSequences : undefined,
-    },
-  });
+  contents: [{ role: "user", parts: [{ text: prompt }] }],
+  generationConfig: {
+    temperature: 0.25, // 👈 set between 0.2–0.3 for precise answers
+    topK: 40,          // 👈 NEW: limits token selection to top 40 choices
+    stopSequences: stopSequences.length > 0 ? stopSequences : undefined,
+  },
+});
 
-  return result.response.text().trim();
+return result.response.text().trim();
 }
+
 
 // ----------------- ZERO SHOT -----------------
 app.post("/check-compatibility", async (req, res) => {
