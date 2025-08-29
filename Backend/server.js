@@ -17,8 +17,9 @@ async function generateWithTemperature(prompt, stopSequences = []) {
   const result = await model.generateContent({
   contents: [{ role: "user", parts: [{ text: prompt }] }],
   generationConfig: {
-    temperature: 0.25, // 👈 set between 0.2–0.3 for precise answers
-    topK: 40,          // 👈 NEW: limits token selection to top 40 choices
+    temperature: 0.25, 
+    topK: 40,
+    topP: 0.7,          
     stopSequences: stopSequences.length > 0 ? stopSequences : undefined,
   },
 });
