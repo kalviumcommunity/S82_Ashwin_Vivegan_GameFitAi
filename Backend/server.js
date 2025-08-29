@@ -24,6 +24,11 @@ async function generateWithTemperature(prompt, stopSequences = []) {
   },
 });
 
+const usage = result.response.usageMetadata;
+console.log("Prompt tokens:", usage.promptTokenCount);
+console.log("Completion tokens:", usage.candidatesTokenCount);
+console.log("Total tokens:", usage.totalTokenCount);
+
 return result.response.text().trim();
 }
 
